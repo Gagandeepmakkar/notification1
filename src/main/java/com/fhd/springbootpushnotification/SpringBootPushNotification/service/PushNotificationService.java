@@ -21,7 +21,13 @@ public class PushNotificationService {
 
     private Logger logger = LoggerFactory.getLogger(PushNotificationService.class);
     private FCMService fcmService;
-
+    public void sendPushNotificationCustomDataWithTopicWithSpecificJson(PushNotificationRequest request) {
+        try {
+            fcmService.sendMessageCustomDataWithTopic(getSamplePayloadDataWithSpecificJsonFormat(), request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+    }
     public PushNotificationService(FCMService fcmService) {
         this.fcmService = fcmService;
     }
@@ -45,13 +51,13 @@ public class PushNotificationService {
         }
     }
 
-    public void sendPushNotificationCustomDataWithTopicWithSpecificJson(PushNotificationRequest request) {
-        try {
-            fcmService.sendMessageCustomDataWithTopic(getSamplePayloadDataWithSpecificJsonFormat(), request);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-        }
-    }
+//    public void sendPushNotificationCustomDataWithTopicWithSpecificJson(PushNotificationRequest request) {
+//        try {
+//            fcmService.sendMessageCustomDataWithTopic(getSamplePayloadDataWithSpecificJsonFormat(), request);
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//        }
+//    }
 
     public void sendPushNotificationWithoutData(PushNotificationRequest request) {
         try {
@@ -69,15 +75,17 @@ public class PushNotificationService {
             logger.error(e.getMessage());
         }
     }
-//    public void sendPushNotificationToTokens(PushNotificationRequest request) {
-//        try {
-//            fcmService.sendMessageToToken(request);
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//        }
-//
-//
-//    }
+
+
+    public void sendPushNotificationToTokens(PushNotificationRequest request) {
+        try {
+            fcmService.sendMessageToTokens(request);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+
+
+    }
 
 
     private Map<String, String> getSamplePayloadData() {

@@ -30,11 +30,11 @@ public class PushNotificationController {
         pushNotificationService.sendPushNotificationToToken(request);
         return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
     }
-//    @PostMapping("/notification/tokens")
-//    public ResponseEntity sendTokensNotification(@RequestBody PushNotificationRequest request) {
-//        pushNotificationService.sendPushNotificationToTokens(request);
-//        return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
-//    }
+    @PostMapping("/notification/tokens")
+    public ResponseEntity sendTokensNotification(@RequestBody PushNotificationRequest request) {
+        pushNotificationService.sendPushNotificationToTokens(request);
+        return new ResponseEntity<>(new PushNotificationResponse(HttpStatus.OK.value(), "Notification has been sent."), HttpStatus.OK);
+    }
 
     @PostMapping("/notification/data")
     public ResponseEntity sendDataNotification(@RequestBody PushNotificationRequest request) {

@@ -23,7 +23,7 @@ public class FCMService {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonOutput = gson.toJson(message);
         String response = sendAndGetResponse(message);
-        logger.info("Sent message with data. Topic: " + request.getTopic() + ", " + response+ " msg "+jsonOutput);
+        logger.info("Sent message with data. Topic: " + request.getTopic() + ", " + response + " msg " + jsonOutput);
     }
 
     public void sendMessageToToken(PushNotificationRequest request)
@@ -32,46 +32,55 @@ public class FCMService {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonOutput = gson.toJson(message);
         String response = sendAndGetResponse(message);
-        logger.info("Sent message to token. Device token: " + request.getToken() + ", " + response+ " msg "+jsonOutput);
+        logger.info("Sent message to token. Device token: " + request.getToken() + ", " + response + " msg " + jsonOutput);
     }
-
-//    public void sendMessageToTokens(PushNotificationRequest request)     throws InterruptedException, ExecutionException {
-//
-//
-//
-//
-//            Message message = getPreconfiguredMessageToTokens(request);
-//            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//            String jsonOutput = gson.toJson(message.get(i));
-//            String response = sendAndGetResponse(message.get(i));
-//            logger.info("Sent message to token. Device token: " + request.getTokens().get(i) + ", " + response + " msg " + jsonOutput);
-//
-//
-//    }
-//
-//    private List<Message> getPreconfiguredMessageToTokens(PushNotificationRequest request) {
-//        MulticastMessage msg = MulticastMessage.builder()
-//                .addAllTokens(request.getTokens())
-//                .putData("body", "some data")
-//                .build();
-//      return msg;
-//
-//    }
-
     private Message getPreconfiguredMessageToToken(PushNotificationRequest request) {
         return getPreconfiguredMessageBuilder(request).setToken(request.getToken())
                 .build();
 
+    }
 
+    public void sendMessageToTokens(PushNotificationRequest request) throws FirebaseMessagingException, ExecutionException, InterruptedException {
+        MulticastMessage msg = getPreconfiguredMessageToTokens(request);
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String jsonOutput = gson.toJson(msg);
+        BatchResponse response = sendAndGetResponses(msg);
+
+        logger.info("Sent message to token. Device token: " + request.getToken() + ", " + response + " msg " + jsonOutput);
 
     }
+    private MulticastMessage getPreconfiguredMessageToTokens(PushNotificationRequest request) {
+        return getPreconfiguredMessageBuilders(request).addAllTokens(request.getTokens())
+                .build();
+
+    }
+
+    private MulticastMessage.Builder getPreconfiguredMessageBuilders(PushNotificationRequest request) {
+        AndroidConfig androidConfig = getAndroidConfig(request.getTopic());
+        ApnsConfig apnsConfig = getApnsConfig(request.getTopic());
+        return MulticastMessage.builder()
+                .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig).setNotification(
+                        new Notification(request.getTitle(), request.getMessage()));
+    }
+
+
+    private Message.Builder getPreconfiguredMessageBuilder(PushNotificationRequest request) {
+        AndroidConfig androidConfig = getAndroidConfig(request.getTopic());
+        ApnsConfig apnsConfig = getApnsConfig(request.getTopic());
+        return Message.builder()
+                .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig).setNotification(
+                        new Notification(request.getTitle(), request.getMessage()));
+    }
+
+
+
     public void sendMessageCustomDataWithTopic(Map<String, String> data, PushNotificationRequest request)
             throws InterruptedException, ExecutionException {
         Message message = getPreconfiguredMessageWithDataCustomWithTopic(data, request);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String jsonOutput = gson.toJson(message);
         String response = sendAndGetResponse(message);
-        logger.info("Sent message with data. Topic: " + data.get("topic") + ", " + response+ " msg "+jsonOutput);
+        logger.info("Sent message with data. Topic: " + data.get("topic") + ", " + response + " msg " + jsonOutput);
     }
 
 
@@ -83,10 +92,13 @@ public class FCMService {
     }
 
 
-
     private String sendAndGetResponse(Message message) throws InterruptedException, ExecutionException {
         return FirebaseMessaging.getInstance().sendAsync(message).get();
     }
+    private BatchResponse sendAndGetResponses(MulticastMessage message) throws InterruptedException, ExecutionException, FirebaseMessagingException {
+        return FirebaseMessaging.getInstance().sendMulticast(message);
+    }
+
 
 
     private AndroidConfig getAndroidConfig(String topic) {
@@ -103,9 +115,6 @@ public class FCMService {
     }
 
 
-
-
-
     private Message getPreconfiguredMessageWithData(Map<String, String> data, PushNotificationRequest request) {
         return getPreconfiguredMessageBuilder(request).putAllData(data).setToken(request.getToken())
                 .build();
@@ -118,13 +127,6 @@ public class FCMService {
 
 
 
-    private Message.Builder getPreconfiguredMessageBuilder(PushNotificationRequest request) {
-        AndroidConfig androidConfig = getAndroidConfig(request.getTopic());
-        ApnsConfig apnsConfig = getApnsConfig(request.getTopic());
-        return Message.builder()
-                .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig).setNotification(
-                        new Notification(request.getTitle(), request.getMessage()) );
-    }
 
 
     private Message getPreconfiguredMessageWithDataCustomWithTopic(Map<String, String> data, PushNotificationRequest request) {
@@ -139,7 +141,6 @@ public class FCMService {
                 .setApnsConfig(apnsConfig).setAndroidConfig(androidConfig).setNotification(
                         new Notification(data.get("title"), data.toString()));
     }
-
 
 
 }
